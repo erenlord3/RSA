@@ -1,0 +1,164 @@
+package Grafo;
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class tabla<E> {
+
+    
+
+    private class Tabla<E>{
+        private String data;
+
+        Tabla(String Dato){
+                this.data = Dato;
+        }
+
+        public String getData() {
+                return data;
+        }
+
+        public void setData(String data) {
+                this.data = data;
+        }    
+    }
+
+    private Tabla<E>[] Nodo;
+    private int[][] destino;
+    private int r = 1;
+
+    public void ingresar_Datos() {
+        System.out.println("\nPROGRMA DE AUTOMORFISMO");
+        Scanner dato = new Scanner(System.in);
+        System.out.print("\n Digite el numero de Grafos: ");
+        int a = dato.nextInt();
+
+        System.out.println("\nGrafo tabla ingresar Datos...............\n");
+
+        int[][] linea = new int[a][a];
+        
+        for (int i = 0; i < a; i++) {
+
+            System.out.print("Digite el valor del Grafo " + i + ": ");
+            Scanner valor = new  Scanner(System.in);
+
+            if(i==0){
+                Nodo = new Tabla[a];
+            }
+            Nodo[i] = new Tabla<>(valor.next());
+        }
+
+        System.out.println(" \n\nGenerar los enlaces de cada Grafo.+"  + ", Si(1) o No (0)\n");
+
+        for (int i = 0; i < a; i++) {
+            System.out.println("\t\nEnlaces del Grafo " + i + " (" + Nodo[i].getData() + ") : \n");
+
+            for (int j = i+1; j < a; j++) {
+
+                int c = 3;
+                while (c != 1 && c != 0){
+
+                    System.out.print("Grafo " + j + " (" + Nodo[j].getData() + ") : ");
+                    Scanner bool = new Scanner(System.in);
+                    c = bool.nextInt();
+                }
+
+                if(c == 1){
+                    linea[i][j] = 1;
+                }
+            }
+        }
+        destino = linea;
+    }
+    
+    private void mostrar_matriz(int[][] linea) {
+        System.out.println("\nFuncion matricial de conexión");
+        
+        for (int[] linea1 : linea) {
+            System.out.println("\t");
+            for (int i = 0; i < linea1.length; i++) {
+                if(linea1[i] == 2) linea1[i] = 1;
+                System.out.print(linea1[i] + "   ");
+                
+            }
+        }
+    }
+    
+    private void leer_tabla(int[][] linea) {
+        
+        System.out.println("\nPermutacion " + r++);
+        for(int i = 0; i < Nodo.length; i++) {
+            
+            for(int j = 0; j < Nodo.length; j++) {
+                
+                if(linea[i][j] == 1){
+                    System.out.println("{" + Nodo[i].getData() + ", " + Nodo[j].getData() + "}");
+                }
+            }
+        }  
+    }
+    
+    private int[][] copiar(int[][] linea) {
+        int a = linea.length;
+        int[][] aux = new int[a][a];
+        for (int i = 0; i <a; i++) {
+            for (int j = 0; j < a; j++) {
+                if(linea[i][j]==1) aux[i][j] = 1;
+                else aux[i][j] = 0;
+            }
+        }
+        return aux;
+    }
+    
+    private int[][][] aumentar(int[][][] lista) {
+        
+        int a = destino.length;
+        int[][][] aux = new int[lista.length+1][a][a];
+        System.arraycopy(lista, 0, aux, 0, lista.length);
+        
+        return aux;
+    }
+
+    public void automorfismo() {
+        int i = 0;
+        
+        int[][] linea = destino;
+        leer_tabla(linea);
+        int[][][] lista = new int[1][linea.length][linea.length];
+        lista[0] = copiar(linea);
+        
+        while(i < linea.length){
+
+            boolean b= true;
+
+            for (int j = 0; j < linea.length; j++) {
+                if (linea[i][j] == 1){
+                    linea[i][j] = 0;
+                    linea[j][i] = 1;
+                }
+            }
+            
+            for (int[][] lista1 : lista) {
+                
+                if (Arrays.deepEquals(lista1, linea)) {
+                    b=false;
+                    break;
+                }
+            }
+            
+            if(b){
+                
+                leer_tabla(linea);
+                i=0;
+                lista = aumentar(lista);
+                
+                lista[lista.length-1] = copiar(linea);
+            }
+            else{
+                i++;
+            }
+
+        }
+    }
+
+}
