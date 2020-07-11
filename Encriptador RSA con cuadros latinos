@@ -1,0 +1,436 @@
+#Programa encriptador
+
+import string
+import random
+import math
+
+# FUNCION 1 REMUEVE LAS PUNTUACIONES, SIGNO, ESPACIO Y LOS NUMEROS
+def removePunt(word):
+  arrPuntiation = ""
+  for c in string.punctuation:
+      arrPuntiation =  arrPuntiation +c
+  
+  arrPuntiation = arrPuntiation+" ";
+  arrPuntiation = arrPuntiation + '' + "," + "."
+  wordNew = "";
+  
+  for j in range(len(word)):
+    isPunt = False;
+    for i in range(len(arrPuntiation)):
+      if arrPuntiation[i]==word[j]:
+        isPunt = True;
+        
+    if isPunt==False:
+      wordNew = wordNew + word[j];
+  return wordNew;
+
+# FUNCION 2 COMVIERTE LAS LETRAS MAYUSCULAS EN MINUSCILAS
+def cleanStrs(arrStr):
+	
+	arrNew = [];
+	for j in arrStr:
+		arrNew1 = []
+		m = ''
+		for i in j:
+
+			if(i == "\xa1" and m != '\xc2' or i =="\x81"):
+				arrNew1.append(removePunt("a").upper())
+			elif(i == '\xa9' or i == '\x89'):
+				arrNew1.append(removePunt("e").upper())
+			elif(i == '\xad' or i == '\x8d'):
+				arrNew1.append(removePunt("i").upper())
+			elif(i == '\xb3' or i == '\x93'):
+				arrNew1.append(removePunt("o").upper())
+			elif(i == '\xba' or i == '\x9a' or i == '\xbc' or i == '\x9c'):
+				arrNew1.append(removePunt("u").upper())
+			elif(i == '\xb1' or i == '\x91'):
+				arrNew1.append(removePunt("n").upper())
+				arrNew1.append(removePunt("i").upper())
+			elif(ord(i)!=32 and i != '\xc3' and i != '' and i != '\xc2' and i != "\xa1"):
+				if(removePunt(i).upper() != ''):
+					arrNew1.append(removePunt(i).upper())
+			m = i
+		arrNew.append(arrNew1)
+	return arrNew;
+
+#Funcion para leer el mensaje en el txt
+def enlistar():
+	biblio=[]
+	archivo=open("Texto.txt")
+	lista=archivo.read().splitlines()
+	print "\nLectura del mensaje mensaje ------------------------------\n"
+	for x in lista:
+		print x
+	return lista
+
+#Funcion para calcular el tamanio ideal de la matriz con respecto al tamanio de mensaje 
+def tamanio(a):
+	b = round(math.sqrt(a)+0.49)
+	return b
+
+#Funcion para crear la matriz con el tamanio definido
+def cripto(Texto, num):
+	matriz = []
+
+	mat = []
+	a = 0
+	#Parte para crear la matriz con respecto al tamanio
+	for i in Texto:
+		for letra in i:
+			if(a<num):
+				a=a+1
+				mat.append(letra)
+				
+			else:
+				a=1
+				matriz.append(mat)
+				mat=[letra]
+
+	matriz.append(mat)
+		
+	while(num != len(matriz[len(matriz)-1])):
+		matriz[len(matriz)-1].append(0)
+
+	while (len(matriz) < num):
+		mar = []
+		for x in xrange(0,int(num)):
+			mar.append(0)
+		matriz.append(mar)
+
+	return matriz
+
+#Funcion final para revisar si el dato cumple con las normas de uso
+def vida(matriz, x, j):
+
+	if(len(matriz) >0):
+		for i in range(0,len(matriz)):
+			if(matriz[i][j]==x):
+				return True
+	
+	return False
+
+#Funcion para comprovar si esta completa y cumple con la condicion de cuadro latino
+def provar(mat):
+
+	for i in range(0,len(mat)):
+	
+		for j in range(i+1,len(mat)):
+			if(mat[i]==mat[j]):
+				return False
+	
+	return True
+
+#Funcion para llenar el vector n-esimo sin afectar las filas o columnas
+def cvector(i,a, matriz):
+	
+	while(True):
+		
+		mat = []
+		for j in range(0,a):
+			
+			x = random.randint(1,a)
+			
+			while(vida(matriz, x, j)):
+				x = random.randint(1,a)
+			
+			mat.append(x)
+		
+		if(provar(mat)):
+			break
+	return mat
+
+def columnas(c,n):
+	mat =[]
+	
+	for x in xrange(0,n):
+		mar = []
+	
+		for y in xrange(0,n):
+			mar.append(c[y][x])
+		mat.append(mar)
+
+	return mat
+
+#Funcion inicial para controlar la creacion del cuadro latino con respecto a las fila, una por una se desarrolla
+def cuadro_latino(n):
+	"""
+	matriz = []
+	
+	for i in range(0,a):
+		mat = cvector(i, a, matriz)
+			
+		matriz.append(mat)
+"""
+	a = []
+
+	for x in xrange(1,n+1):
+		a.append(x)
+
+	for x in xrange(1,5):
+		random.shuffle(a)
+
+	c = [[a[i - j] for i in range(n)] for j in range(n, 0, -1)]
+
+	for x in xrange(1,5):
+		random.shuffle(c)
+	
+	c = columnas(c,n)
+
+	for x in xrange(1,5):
+		random.shuffle(c)
+
+	return c
+
+#Funcion que encripta la matriz a codigo ascii
+def cambio(matriz):
+	mat = []
+	mal = []
+	for x in matriz:
+		p = []
+		l=[]
+		for y in x:
+			l.append(ord(str(y)))
+			p.append(ord(str(y))-47)	
+		mat.append(p)
+		mal.append(l)
+	return mat
+
+#Funcio que crea una matriz identidad con el cuadro latino
+def ideanti(matriz):
+	mat = []
+	for i in range(0,len(matriz)):
+		pan = []
+		for j in range(0,len(matriz)):
+			if(i == j):
+				pan.append(matriz[i][j])
+			else:
+				pan.append(0)
+		mat.append(pan)
+	return mat
+
+def txt(nulos,codificar):
+	d=len(codificar)
+
+	f = open("Datos.txt",'w')
+	for x in codificar:
+		f.write("[")
+
+		for y in range(0,d):
+
+			f.write("%d"%x[y])
+
+			if(y<d-1): f.write(", ")
+
+		f.write("]\n")
+	f.write("-\n")
+
+	for x in nulos:
+		f.write("[")
+
+		for y in range(0,d):
+
+			f.write("%d"%x[y])
+
+			if(y<d-1): f.write(", ")
+
+		f.write("]\n")
+	f.close()
+
+##---------------------------------------------------------------------------------------------
+#codigo para el RSA
+
+def Cripto_RSA(e,m):
+	i=0
+	while i<m :
+		if (i*e)%m == 1:
+			return i
+		i+=1
+	return False 
+
+def cifrar(m, publ):
+	return int((m**publ[0])%publ[1])
+	
+
+def descifrar(c,priv):
+	return int((c**priv[0])%priv[1])
+
+def primos(p):
+	mat = [2]
+	a = 2
+	for i in range(0,p):
+		b = 0
+
+		while(b<len(mat)):
+			if(a%mat[b]==0):
+				a = a+1
+				b=0
+			else:
+				b = b+1
+		mat.append(a)
+	return mat
+
+#Funcion que crea un txt para la llaves
+def crear_txt(Clave_publica,Clave_privada):
+	f = open("llaves.txt",'w')
+	f.write("Clave publica: ")
+	f.write("[%d"%Clave_publica[0]+", %d]"%Clave_publica[1])
+	f.write("\n\n")
+
+	f.write("Clave privada: ")
+	f.write("[%d"%Clave_privada[0]+", %d]"%Clave_privada[1])
+	f.write("\n")
+	f.close()
+
+##---------------------------------------------------------------------------------------------
+#Funcion que codifica la matriz encriptada con la matriz identidad y sacarle el modulo
+def codificado(identidad,mat_ascii,publica):
+	mat = []
+	
+	for i in range(0,len(mat_ascii)):
+		pan = []
+		for j in range(0,len(mat_ascii)):
+			pan.append(cifrar((mat_ascii[i][j]*identidad[j][j]),publica))
+		mat.append(pan)
+	return mat
+
+#Funcion que genera el cuadro latino con datos ocultos.
+def datos(matriz, num):
+	mat = []
+
+	for i in range(0,num):
+		p = []
+		for j in range(0,num):
+			p.append(0)
+		mat.append(p)
+	g = 0
+	if (num<10):
+		g =int((num**2/2)+num/2)
+	elif(num<20):
+		g =int((num**2/2)+2*num)
+	elif(num<30):
+		g =int((num**2/2)+5*num)
+	elif(num<40):
+		g =int((num**2/2)+7*num)
+	else:
+		g =int((num**2/(2)+10*num))
+
+	print num**2, ' | ', g
+	t = 0
+	for i in range(0,g):
+		x = random.randint(0,num-1)
+		y = random.randint(0,num-1)
+		
+		while(mat[x][y] != 0 or x == y):
+			x = random.randint(0,num-1)
+			y = random.randint(0,num-1)
+
+		mat[x][y] = matriz[x][y]
+		t +=1
+	print t
+	return mat
+
+#Funcion que verifica si el cuadro latino no tiene datos en la identidad
+def prueba(nulos):
+	for i in range(0,len(nulos)):
+		if(nulos[i][i]!=0):
+			return False
+	return True
+
+
+#---------------------------------------------------------------------------------------------------
+# Funcion para el RSA, crear la identidad con la codificacion
+def llaves():
+
+	dato = []
+
+	Clave_publica = []
+
+	Clave_privada = []
+
+	tal = primos(50)
+
+	#Calcular los datos p,q,e,n,d para allar las llaves publicas y privadas que se usaran en el mensaje
+	#se debe tener en cuenta que al usar estas llaves se dara una nueva llave para almacenar y todo el
+	#el sistema se guardara en un sistema adicional para su uso
+	while(True):
+		p = random.randint(10,50)	
+		q = random.randint(10,50)
+		e = random.randint(20,50)
+
+		a = tal[p-1]
+		b = tal[q-1]
+		n =	a*b
+
+		fi= (a-1)*(b-1)
+		d = Cripto_RSA(e,fi)
+
+		if(d and p!=q):
+			break
+
+	Clave_publica = [e,n]
+	Clave_privada = [d,n]
+
+	print "Clave publica ", Clave_publica
+	print "Clave privada ", Clave_privada
+	print
+
+	crear_txt(Clave_publica,Clave_privada)
+	
+	return Clave_publica,Clave_privada
+
+##---------------------------------------------------------------------------------------------
+
+
+Texto = cleanStrs(enlistar())
+
+a=0
+
+print "\nLectura del mensaje mensaje y generar un Vector----------\n"
+for x in Texto:
+	a = a+len(x)
+#print Texto
+
+NUMmatriz = int(tamanio(a))
+
+print "\nCrear una matriz del mensaje-----------------------------\n"
+matriz = cripto(Texto, NUMmatriz)
+for x in matriz:
+	print x
+
+print "\nCambiar la matriz mensaje a codigo ascii y se le resta 47\n"
+mat_ascii = cambio(matriz)
+for x in mat_ascii:
+	print x
+
+print "\nCrear un Cuadro Latino de tamanio de la matriz-----------\n"
+matriz2 = cuadro_latino(NUMmatriz)
+for x in matriz2:
+	print x
+
+print "\nMatriz identidad del Cuadro latino-----------------------\n"
+identidad = ideanti(matriz2)
+for x in identidad:
+	print x
+
+print "\nSe crean las llaves publicas y latinas\n"
+
+Clave_publica,Clave_privada = llaves()
+
+print "\nCodificar la matriz mesaje con la matriz identidad (M*I) con el modulo privada-\n"
+codificar = codificado(identidad,mat_ascii, Clave_publica)
+
+for x in codificar:
+	print x
+
+print "\nCuadro Latino oculto---------------------------------------\n"
+
+while(True):
+	nulos = datos(matriz2, NUMmatriz)
+	if(prueba(nulos)):
+		break
+
+for x in nulos:
+	print x
+print "\n--------------------------------------------------------------"
+
+txt(nulos,codificar)
