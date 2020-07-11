@@ -1,0 +1,264 @@
+#Programa para desencriptar
+
+#Mostrar el cuadro latino en desarrollo
+def mostrar(latino):
+	a = len(latino)
+	for l in range(0,(2*a)+int(a/2)+1):
+		print "-",
+	print
+	for x in latino:
+		for y in x:
+			if(y>9):
+				print "|",
+			else:
+				print "| ",
+			print y,
+		print "|"
+		for l in range(0,(2*a)+int(a/2)+1):
+			print "-",
+		print
+
+
+#Funcion para leer el txt.
+def leermatriz():
+	archivo=open("Datos.txt")
+	return archivo.read().splitlines()
+
+#Funcion para definir si es un numero
+def numero(l):
+	for x in range(0,10):
+		if(l==str(x)):
+			return True
+	return False
+	
+#Funcion para dividir la parte encriptada del cuadro latino
+def dividir(lista):
+	cuadro_latino = []
+	encriptada = []
+	d = True
+	for parte in lista:
+		mat = []
+		a = 0
+		
+		for lado in parte:
+			
+			if(lado == "," or lado == "]"):
+				mat.append(a)
+				a=0
+			elif(lado == "-"):
+				d = False
+
+			elif(lado != "[" and lado != " " and numero(lado)):
+				a = (a*10)+int(lado)
+				
+		if d:
+			if(len(mat)): encriptada.append(mat)
+		else:
+			if (len(mat) !=0): cuadro_latino.append(mat)
+	return encriptada, cuadro_latino
+
+#Funcion para determinar los posibles numeros, comparando filas y columnas
+def convinar(x,y,a,latino):
+	mat = []
+	for i in range(0,a):
+
+		#Revisar la matriz en fila
+		if(latino[x][i] != 0):
+			l = 0
+			p = True
+			while(l<len(mat) and p):
+				if(mat[l] == latino[x][i]):
+					p=False
+				
+				l=l+1
+			
+			if p:
+				mat.append(latino[x][i])
+
+		#Revisar la matriz en columna
+		if(latino[i][y] != 0):
+			l = 0
+			p = True
+			while(l<len(mat) and p):
+				if(mat[l] == latino[i][y]):
+					p=False
+			
+				l=l+1
+			
+			if p:
+				mat.append(latino[i][y])
+
+	mar = []
+	for x in range(1,a+1):
+		mar.append(x)
+
+	for x in mat:
+		mar.remove(x)
+
+	return mar
+
+#Funcion para probar que el cuadro latino se resolvio completamente o se necesita ayuda del usuario
+def prueba(latino):
+	for x in latino:
+		for y in x:
+			if(y == 0):
+				return False
+	return True
+
+#Funcion para revisar que el dato ingresado por el usuario no sea repetido o erroneo
+def repetida(cuadro, b, x, y):
+	for i in range(0,len(cuadro)):
+		if(cuadro[x][i] == b or cuadro[i][y] == b):
+			return True
+	return False		
+
+#Funcion para resolver el cuadro latino.
+def Resolver(cuadro_latino):
+	a = len(cuadro_latino)
+	mar = []
+	
+	#crear un vector con los n elementos de la matriz
+	for x in range(1,a+1):
+		mar.append(x)
+
+	x=0
+	y=0
+
+	#dato para guardar el avance del cuadro latino
+	aux = []
+	c = True
+
+	while True:
+		g = True
+		while (x<a):
+			while (y<a):
+				convinado = []
+
+				if(cuadro_latino[x][y] == 0):
+
+					convinado = convinar(x,y,a,cuadro_latino)
+
+					if(len(convinado)==1):
+
+						cuadro_latino[x][y] = convinado[0]
+						x = 0
+						y = 0
+						
+					elif(len(convinado) == 0 and c):
+						print('Error no puedo se puede calcular convinados')
+						exit(-1)
+
+
+
+				y=y+1
+
+			x = x+1
+			
+			#reinicie una ultima vez para revisar desde el principio
+			if(x == a and y == a and g):
+				x=0
+				y=0
+				g = False
+			
+			y = 0
+
+		#Revisar si esta llena o no el cuadro latino
+		if(prueba(cuadro_latino)==False):
+			if c:
+				c = False
+				aux = cuadro_latino
+				
+
+			else:
+				cuadro_latino = aux
+				print "\nEl programa requiere su ayuda, revice el cuadro latino y de una sugerencia\n",
+				print "No hay problema de error, en caso de uno el programa almacena el cuadro anterios\n",
+				print "Como metodo de recuperacion si el dato es incorrecto\n"
+				
+				mostrar(cuadro_latino)
+				
+				print "\nDigite la pocision y el numero que considere el numero"
+				x = int(input("Fila: "))-1
+				y = int(input("Columna: "))-1
+				
+				while(x>=a or y>=a or cuadro_latino[x][y] != 0):
+					print "Datos incorrectos"
+					x = int(input("Fila: "))-1
+					y = int(input("Columna: "))-1
+				print
+				b = int(input("Dato no superior a %d: "%a))
+				
+				while (b>a or repetida(cuadro_latino, b, x, y)):
+					b = int(input("Dato no superior a %d o no repetido: "%a))
+
+				cuadro_latino[x][y] = b
+
+		else:
+			break
+			
+	return cuadro_latino
+
+#Funcion para crear la matriz identidas del cuadro latino
+def idea(latino):
+	
+	mar = []
+	for x in range(0,len(latino)):
+		mat = []
+		for y in range(0,len(latino)):
+			
+			if(x==y):
+				mat.append(latino[x][y])
+			else:
+				mat.append(0)
+
+		mar.append(mat)
+	return mar
+
+def descifrar(c,priv):
+	return int((c**priv[0])%priv[1])
+ 
+#Funcion para descemcriptar el mensaje oculto
+def descemcripto(i, en):
+	
+	#Se pide la llave privada para el desarrollo de las operaciones
+	print "\nSolicitar la llave privada\n"
+	a = int(input("Dato 1: "))
+	b = int(input("Dato 2: "))
+	privada = [a,b]
+	mat = []
+	for x in range(0,len(i)):
+		mar = []
+		for y in range(0,len(i)):
+			l = (int(descifrar(en[x][y],privada)/i[y][y]))+47
+
+			mar.append(chr(l))
+		mat.append(mar)
+	return mat
+
+#Leer el documento donde se guarda la matriz.
+lista = leermatriz()
+
+(encriptado, cuadro_latino) = dividir(lista)
+print "\nMensaje oculto\n"
+for x in encriptado:
+	print x
+
+print "\nCuadro latino desarmado\n"
+mostrar(cuadro_latino)
+
+#Resolver el cuadro latino
+cuadro_latino = Resolver(cuadro_latino)
+print "\nCuadro latino Armado\n"
+mostrar(cuadro_latino)
+
+#Crear la matriz identidad
+identidad = idea(cuadro_latino)
+print "\nMatriz identidad del cuadro latino\n"
+for x in identidad:
+	print x
+
+#Desencriptar el mensaje
+descemcriptar = descemcripto(identidad, encriptado)
+print"\nMensaje descemcriptado, entenderlo es cosa suya suerte parce\nsi lo logras bien perrito de resto suerte\n"
+for x in descemcriptar:
+	print x
